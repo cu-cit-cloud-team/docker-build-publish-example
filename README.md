@@ -69,7 +69,10 @@ git push origin v1.0.0
 
 Watch Github Actions for the results of your workflow run. Upon success you should see an image pushed to the following locations:
 
-- The packages section of your forked Github repo. E.g. `https://github.com/mygithubuser/docker-build-publish-example/pkgs/container/docker-build-publish-example`
-- Your Docker Hub repository. E.g., 
+- The packages section of your forked Github repo. 
+    - E.g., `https://github.com/mygithubuser/docker-build-publish-example/pkgs/container/docker-build-publish-example`
+- Your Docker Hub repository. 
+    - E.g., 
 `https://hub.docker.com/repository/docker/mydockerhubuser/docker-build-publish-example/`
-- Your AWS ECR repository. E.g., `https://us-east-1.console.aws.amazon.com/ecr/repositories/private/123456789012/docker-build-publish-example?region=us-east-1`
+- Your AWS ECR repository. 
+    - E.g., `https://us-east-1.console.aws.amazon.com/ecr/repositories/private/123456789012/docker-build-publish-example?region=us-east-1`
