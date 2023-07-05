@@ -1,0 +1,155 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Example role for using Github to build and push Docker images to ECR
+
+# This templates assumes that the Github OIDC provider `token.actions.githubusercontent.com` 
+# has already been created in the AWS account.
+
+Metadata:
+  Source: https://github.com/CU-CommunityApps/ct-docker-build-publish-example/blob/main/aws/iam-ecr/template.yml
+  Version: "1.0.0"
+  RecommendedStackName: github-ecr-publish-$ENV-role
+  ChangeLog:
+    "1.0.0":
+      - inital release
+
+Parameters:
+
+  VersionParam:
+    Description: CIT template version
+    Type: String
+    
+  ContactEmailParam:
+    Description: CIT contact email tag value version
+    Default: cloud-support@cornell.edu
+    Type: String
+    
+  SourceURLParam:
+    Description: URL of this template in source code repository (not necessarily public)
+    Type: String
+
+  EnvironmentParam:
+    Description: Environment for the resources this template creates.
+    Default: dev
+    Type: String
+    AllowedValues:
+      - dev
+      - test
+      - prod
+  
+  DocumentationURLParam:
+    Description: URL of documentation about this deployment or these resources
+    Type: String
+
+  GithubRepoListParam:
+    Description: Comma-separated list consisting one or more GITHUB_ORG/GITHUB_REPO values. Case sensitive. Do not include spaces. E.g. "org1/repo1,org2/repo2".
+    Type: CommaDelimitedList
+
+  ECRRepoParam:
+    Description: Name of the ECR repository to push to
+    Type: String
+    Default: docker-build-publish-example
+
+Mappings: {}
+
+Conditions: {} 
+
+Resources:
+
+  Role:
+    Type: AWS::IAM::Role
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Delete
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com"
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              ForAnyValue:StringLike:
+                token.actions.githubusercontent.com:sub: 
+                  !Split
+                    - ","
+                    - !Sub 
+                      - "repo:${LIST}:*"
+                      - LIST: !Join [ ":*,repo:", !Ref GithubRepoListParam ]
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentParam
+        - Key: Description
+          Value: IAM Role for Github Actions to push Docker images to ECR
+        - Key: Documentation
+          Value: !Ref DocumentationURLParam
+        - Key: cit:contact-email
+          Value: !Ref ContactEmailParam
+        - Key: cit:version
+          Value: !Ref VersionParam
+        - Key: cit:source
+          Value:  !Ref SourceURLParam
+
+  Policy:
+    Type: AWS::IAM::Policy
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Delete
+    Properties: 
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+
+          - Sid: ECRAuth
+            Effect: Allow
+            Action: ecr:GetAuthorizationToken
+            Resource: "*"
+
+          - Sid: ECRPushPull
+            Effect: Allow
+            Action:
+              - ecr:BatchGetImage
+              - ecr:BatchCheckLayerAvailability
+              - ecr:CompleteLayerUpload
+              - ecr:GetDownloadUrlForLayer
+              - ecr:InitiateLayerUpload
+              - ecr:PutImage
+              - ecr:UploadLayerPart
+            Resource: !GetAtt ECRRepo.Arn
+
+      PolicyName: !Ref Role
+      Roles: 
+        - !Ref Role
+
+  ECRRepo:
+    Type: AWS::ECR::Repository
+    Properties: 
+      # EncryptionConfiguration: 
+      #   EncryptionConfiguration
+      # ImageScanningConfiguration: 
+      #   ImageScanningConfiguration
+      # ImageTagMutability: String
+      # LifecyclePolicy: 
+      #   LifecyclePolicy
+      RepositoryName: !Ref ECRRepoParam
+      # RepositoryPolicyText: Json
+      Tags: 
+        - Key: Environment
+          Value: !Ref EnvironmentParam
+        - Key: Description
+          Value: ECR repository for Docker images built by Github Actions
+        - Key: Documentation
+          Value: !Ref DocumentationURLParam
+        - Key: cit:contact-email
+          Value: !Ref ContactEmailParam
+        - Key: cit:version
+          Value: !Ref VersionParam
+        - Key: cit:source
+          Value:  !Ref SourceURLParam
+
+
+Outputs:
+  RoleArn:
+    Value: !GetAtt Role.Arn 
+

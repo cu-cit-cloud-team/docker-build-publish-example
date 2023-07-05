@@ -1,0 +1,77 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Resources for Cornell standard Github OIDC Identity Provider.
+
+Metadata:
+  Source: https://github.com/CU-CommunityApps/ct-docker-build-publish-example/blob/main/aws/oidc-idp/template.yml
+  Version: "1.1.0"
+  RecommendedStackName: cornell-github-oidc-idp
+  ChangeLog:
+    "1.1.0":
+      - Add second thumbprint. See https://github.blog/changelog/2023-06-27-github-actions-update-on-oidc-integration-with-aws/
+    "1.0.0":
+      - inital release
+
+Parameters:
+
+  VersionParam:
+    Description: CIT template version
+    Type: String
+    
+  ContactEmailParam:
+    Description: CIT contact email tag value version
+    Default: cloud-support@cornell.edu
+    Type: String
+    
+  SourceURLParam:
+    Description: URL of this template in source code repository (not necessarily public)
+    Default: https://github.com/CU-CommunityApps/ct-docker-build-publish-example/blob/main/aws/oidc-idp/template.yml
+    Type: String
+
+  EnvironmentParam:
+    Description: Environment for the resources this template creates.
+    Default: prod
+    Type: String
+    AllowedValues:
+      - dev
+      - test
+      - prod
+  
+  DocumentationURLParam:
+    Description: URL of documentation about this deployment or these resources
+    Default: https://confluence.cornell.edu/documentation/of/this/deployment
+    Type: String
+
+Mappings: {}
+
+Conditions: {} 
+
+Resources:
+
+  # The name of this resource is automatically set based on the Url property. 
+  # This means that only one instance of this resource can be created per AWS account
+  GithubOIDCProvider:
+    Type: AWS::IAM::OIDCProvider
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Delete
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList: 
+        - sts.amazonaws.com
+      ThumbprintList:
+        - 6938fd4d98bab03faadb97b34396831e3780aea1
+        # - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentParam
+        - Key: Description
+          Value: This is the description of this specific resource.
+        - Key: Documentation
+          Value: !Ref DocumentationURLParam
+        - Key: cit:contact-email
+          Value: !Ref ContactEmailParam
+        - Key: cit:version
+          Value: !Ref VersionParam
+        - Key: cit:source
+          Value:  !Ref SourceURLParam

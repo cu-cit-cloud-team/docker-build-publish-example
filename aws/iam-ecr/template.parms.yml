@@ -1,0 +1,16 @@
+---
+Parameters:
+  # set on command line
+  # VersionParam: 
+  # EnvironmentParam:
+
+  ContactEmailParam: cloud-support@cornell.edu
+  SourceURLParam: https://github.com/CU-CommunityApps/ct-docker-build-publish-example/blob/main/aws/iam-ecr/template.yml
+  DocumentationURLParam: https://confluence.cornell.edu/documentation/of/this/deployment
+  GithubRepoListParam: CU-CommunityApps/ct-docker-build-publish-example
+  ECRRepoParam: docker-build-publish-example
+
+Tags:
+  ContactEmailParam: cloud-support@cornell.edu
+  SourceURLParam: https://github.com/CU-CommunityApps/ct-docker-build-publish-example/blob/main/aws/iam-ecr/template.yml
+  DocumentationURLParam: https://confluence.cornell.edu/documentation/of/this/deployment
