@@ -40,7 +40,7 @@ Parameters:
   
   DocumentationURLParam:
     Description: URL of documentation about this deployment or these resources
-    Default: https://confluence.cornell.edu/documentation/of/this/deployment
+    Default: https://confluence.cornell.edu/x/9I-SH
     Type: String
 
 Mappings: {}
